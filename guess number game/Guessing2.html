@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Number Guessing Game</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 50px;
+      }
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container">
+      <h1>Number Guessing Game</h1>
+      <button onclick="startNewGame()">Start New Game</button>
+      <div id="game" style="display: none">
+        <h2>Welcome, <span id="player-name"></span>!</h2>
+        <p>
+          Enter your guess (four digits):
+          <input type="text" id="guess-input" maxlength="4" />
+        </p>
+        <button onclick="submitGuess()">Submit Guess</button>
+        <div id="result"></div>
+      </div>
+      <div id="best-score" style="display: none">
+        <h3>Best Score: <span id="best-score-value">N/A</span></h3>
+      </div>
+    </div>
+
+    <script>
+      let targetNumber;
+      let playerName;
+      let attempts;
+      let startTime;
+
+      function generateRandomNumber() {
+        const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        const number = [];
+
+        for (let i = 0; i < 4; i++) {
+          const randomIndex = Math.floor(Math.random() * digits.length);
+          number.push(digits[randomIndex]);
+          digits.splice(randomIndex, 1);
+        }
+
+        return number.join('');
+      }
+
+      function checkGuess(target, guess) {
+        let plusCount = 0;
+        let minusCount = 0;
+
+        for (let i = 0; i < target.length; i++) {
+          if (target[i] === guess[i]) {
+            plusCount++;
+          } else if (target.includes(guess[i])) {
+            minusCount++;
+          }
+        }
+
+        return {
+          plus: plusCount,
+          minus: minusCount,
+        };
+      }
+
+      function saveScore(score) {}
+
+      function getBestScore() {
+        return null;
+      }
+
+      function updateBestScore(score) {
+        const bestScoreValue = document.getElementById('best-score-value');
+        if (score !== null) {
+          bestScoreValue.textContent = score.toFixed(2);
+        } else {
+          bestScoreValue.textContent = 'N/A';
+        }
+      }
+
+      function startNewGame() {
+        targetNumber = generateRandomNumber();
+        attempts = 0;
+        startTime = new Date();
+
+        const playerNameInput = prompt('Enter your name:');
+        if (playerNameInput) {
+          playerName = playerNameInput;
+          document.getElementById('player-name').textContent = playerName;
+          document.getElementById('game').style.display = 'block';
+          document.getElementById('best-score').style.display = 'block';
+          document.getElementById('result').textContent = '';
+          document.getElementById('guess-input').value = '';
+        }
+      }
+
+      function submitGuess() {
+        const guessInput = document.getElementById('guess-input');
+        const guess = guessInput.value;
+
+        if (!/^\d{4}$/.test(guess)) {
+          alert('Invalid input. Please enter four digits.');
+          return;
+        }
+
+        attempts++;
+
+        const guessResult = checkGuess(targetNumber, guess);
+
+        if (guessResult.plus === 4) {
+          const endTime = new Date();
+          const timeTaken = (endTime - startTime) / 1000;
+          const score = timeTaken + 0.1 * attempts;
+
+          document.getElementById(
+            'result'
+          ).textContent = `Congratulations, ${playerName}! You found the number ${targetNumber} in ${attempts} attempts.`;
+          document.getElementById(
+            'result'
+          ).textContent += ` Time taken: ${timeTaken.toFixed(2)} seconds.`;
+          document.getElementById(
+            'result'
+          ).textContent += ` Your score: ${score.toFixed(2)}.`;
+
+          saveScore(score);
+
+          const bestScore = getBestScore();
+          updateBestScore(bestScore);
+
+          targetNumber = null;
+          playerName = null;
+          attempts = 0;
+          startTime = null;
+          document.getElementById('game').style.display = 'none';
+          document.getElementById('best-score').style.display = 'none';
+        } else {
+          document.getElementById('result').textContent = `Result: ${'+'.repeat(
+            guessResult.plus
+          )}${'-'.repeat(guessResult.minus)}`;
+        }
+
+        guessInput.value = '';
+      }
+    </script>
+  </body>
+</html>
